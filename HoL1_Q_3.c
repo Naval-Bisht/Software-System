@@ -20,9 +20,11 @@ int main(){
         return 1;
     }
 
-    int x=creat(s,S_IRUSR);
+    
+
+    int x=creat(s,S_IRWXU);
     s[2]='k';
-     int y=creat(s,S_IRUSR);
+     int y=creat(s,S_IRWXU);
     if (x < 0) {
         perror("creat is not created succesully \n");
         return 1;
@@ -65,3 +67,68 @@ return 0;
 //        9   Kernel routines [Non standard]
 
 //        A manual page consists of several sections.
+
+/*
+
+Common Flags for open
+
+    O_RDONLY: Open the file for read-only access.
+    O_WRONLY: Open the file for write-only access.
+    O_RDWR: Open the file for both reading and writing.
+    O_CREAT: Create the file if it does not exist. Requires mode to specify file permissions.
+    O_EXCL: Ensure that the file is created only if it does not already exist. It is used with O_CREAT.
+    O_TRUNC: Truncate the file to zero length if it already exists. Used with O_WRONLY or O_RDWR.
+    O_APPEND: Append data to the end of the file. The file pointer is moved to the end before each write.
+    O_NONBLOCK: Open the file in non-blocking mode. For example, when opening a device file, operations that would normally block will return immediately with an error.
+    O_SYNC: Write operations will complete according to the requirements of synchronous I/O file integrity completion.
+    O_DSYNC: Data modifications will be synchronized with the underlying storage device.
+
+Additional Flags
+
+    O_LARGEFILE: Enable support for large files. This flag allows the opening of files larger than 2 GB on 32-bit systems.
+    O_DIRECT: Minimize or eliminate cache effects of I/O operations. Direct I/O can be useful for performance in some scenarios but requires the file to be aligned on a block boundary.
+
+Related System Calls
+
+    close: Closes a file descriptor.
+
+    
+
+                          int close(int fd);
+
+read: Reads data from a file descriptor.
+
+
+
+                       ssize_t read(int fd, void *buf, size_t count);
+
+write: Writes data to a file descriptor.
+
+
+
+                          ssize_t write(int fd, const void *buf, size_t count);
+
+lseek: Repositions the offset of the file descriptor.
+
+
+
+                         off_t lseek(int fd, off_t offset, int whence);
+
+ftruncate: Truncates the file to a specified length.
+
+
+
+                           int ftruncate(int fd, off_t length);
+
+fsync: Synchronizes a file’s in-core state with storage device.
+
+
+
+                         int fsync(int fd);
+
+fdatasync: Similar to fsync, but only synchronizes the file’s data.
+
+
+
+                         int fdatasync(int fd);
+*/
