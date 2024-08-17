@@ -22,7 +22,7 @@ int main(){
 
     
 
-    int x=creat(s,S_IRWXU);
+    int x=creat(s,S_IRWXU);   
     s[2]='k';
      int y=creat(s,S_IRWXU);
     if (x < 0) {

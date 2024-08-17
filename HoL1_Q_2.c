@@ -12,8 +12,29 @@
 int main(){ 
     int a;
     a=10;
-    printf("%d\n",a);
+    while (1)
+    {
+        /* code */ 
+        //  infinte loop
+    }
+    
+    
  
  
 return 0; 
 } 
+
+
+   // to run in bacggroud  first compiler the file 
+         // theen reun using ./a.out &    ==> it will givve the pid of the runnign process and you can also run the terminal
+         //let the pid we get is 11361
+         // ls /proc  ==> to check all the pid of the running process 
+         // ls /proc/11361/fd  to check the process files
+         // Each number corresponds to a different file descriptor:
+
+
+// to check all the deatail about the process 
+//  cat /proc/11361/status  ==> run this line
+
+// to stop the process   ==>                kill 11361
+
