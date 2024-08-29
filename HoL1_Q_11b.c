@@ -12,33 +12,28 @@
 /*
 11. Write a program to open a file, duplicate the file descriptor and append the file with both the
 descriptors and check whether the file is updated properly or not.
-a. use dup
 
+ use fcntl
 */
-
 int main() {
-   char c1[100];
-
-    printf("enter file name \n");
-    fgets(c1,1000,stdin); 
-    int fd = open(c1, O_RDWR |O_APPEND| O_CREAT, 0644);
+    int fd = open("file.txt", O_RDWR |O_APPEND| O_APPEND);
     if (fd < 0) {
-        perror("open error");
+        perror("open");
         return 1;
     }
 
-    // Duplicate the file descriptor using dup
-    int k = dup(fd);
+    // Duplicate the file descriptor using fcntl
+    int k = fcntl(fd, F_DUPFD, 0);
     if (k < 0) {
-        perror("dup");
+        perror("fcntl");
         return 1;
     }
 
     // Append data using the original descriptor
-    write(fd, "Original FD\n", 12);
+    write(fd, "Original FD (fcntl)\n", 21);
 
     // Append data using the duplicated descriptor
-    write(k, "Duplicated FD\n", 14);
+    write(k, "Duplicated FD (fcntl)\n", 23);
 
     close(fd);
     close(k);

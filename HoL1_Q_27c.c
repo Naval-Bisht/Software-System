@@ -19,12 +19,15 @@ e. execvp
 #include<stdlib.h>
 #include <sched.h>
 
-//execl
+//  execv
+
 int main(){ 
-  
-   execl("/bin/ls", "ls", "-Rl", NULL);
-    perror("error in executing the execl");
+       char *args[] = {"ls", "-Rl", NULL};
+    execv("/bin/ls", args);
+    perror("error in executing the  execv");
     return 1;
+  
+ 
 return 0; 
 } 
 

@@ -11,6 +11,10 @@
 #include<string.h>
 #include<stdlib.h>
 #include<sys/wait.h>
+/*
+25. Write a program to create three child processes. The parent should wait for a particular child (use
+waitpid system call).
+*/
 int main(){ 
     int  pids[3];
     int i;

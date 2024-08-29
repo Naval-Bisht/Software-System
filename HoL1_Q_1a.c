@@ -30,25 +30,18 @@ int main(){
 
     char c2[100];
 
-    printf("Enter soft link name \n");
+    printf("Enter hard link name \n");
     fgets(c2,100,stdin);
    
-    int result = symlink(c1, c2);
+   int result = link(c1,c2);
     if (result == 0) {
-        printf("Soft link created successfully.\n");
+        printf("Hard link created successfully.\n");
     } else {
-        perror("symlink");
+        perror("link");
     }
-    return 0; 
+    return 0;
 
 } 
 
 
 
-
-// to compile just give cc filenaeme
-//                 the check by ./a.out
-
-//or if want a to give the name to output file 
-            // cc filemnme -o XYZ
-            // ./XYZ

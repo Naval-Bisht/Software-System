@@ -1,6 +1,10 @@
 //  Rollno: MT2024099 
 //  Name : Naval Kihsore Singh Bisht 
 //  Question No 2 of Hands On List 1 
+/*
+2. Write a simple program to execute in an infinite loop at the background. Go to /proc directory and
+identify all the process related information in the corresponding proc directory.
+*/
 #include<stdio.h>
 #include<fcntl.h>
 #include<unistd.h>

@@ -11,6 +11,7 @@
 #include<string.h>
 #include<stdlib.h>
 #include<sys/wait.h>
+
 int main(){ 
      int g = getpid();
     int pid = fork();

@@ -8,6 +8,26 @@ https://www.geeksforgeeks.org/input-output-system-calls-c-create-open-close-read
 
 
 
+// to check type $man creat
+
+//   The table below shows the section numbers of the manual followed  by  the  types  of
+//        pages they contain.
+
+//        1   Executable programs or shell commands
+//        2   System calls (functions provided by the kernel)
+//        3   Library calls (functions within program libraries)
+//        4   Special files (usually found in /dev)
+//        5   File formats and conventions, e.g. /etc/passwd
+//        6   Games
+//        7   Miscellaneous (including macro packages and conventions), e.g. man(7), groff(7),
+//            man-pages(7)
+//        8   System administration commands (usually only for root)
+//        9   Kernel routines [Non standard]
+
+//        A manual page consists of several sections.
+
+/*
+
 ///////////////////////////////////////////////////////why not using gets in program 3 ///////////////////////////////////////////////////////////////////
 as after c 13 the concept of gets is no more valid so use fgets to take string input . using it to help to get used to it 
 using it but it is very large synatx was very bad.

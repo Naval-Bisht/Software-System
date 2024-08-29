@@ -12,33 +12,33 @@
 /*
 11. Write a program to open a file, duplicate the file descriptor and append the file with both the
 descriptors and check whether the file is updated properly or not.
-a. use dup
+
+ use dup2
 
 */
-
 int main() {
-   char c1[100];
+    char c1[100];
 
     printf("enter file name \n");
     fgets(c1,1000,stdin); 
-    int fd = open(c1, O_RDWR |O_APPEND| O_CREAT, 0644);
+    int fd = open(c1, O_RDWR |O_APPEND | O_CREAT, 0644);
     if (fd < 0) {
-        perror("open error");
+        perror("open");
         return 1;
     }
 
-    // Duplicate the file descriptor using dup
-    int k = dup(fd);
+    // Duplicate the file descriptor using dup2
+    int k = dup2(fd, 100); // Duplicating to descriptor 100
     if (k < 0) {
-        perror("dup");
+        perror("dup2");
         return 1;
     }
 
     // Append data using the original descriptor
-    write(fd, "Original FD\n", 12);
+    write(fd, "Original FD (dup2)\n", 20);
 
     // Append data using the duplicated descriptor
-    write(k, "Duplicated FD\n", 14);
+    write(k, "Duplicated FD (dup2)\n", 22);
 
     close(fd);
     close(k);

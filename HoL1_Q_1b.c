@@ -27,19 +27,14 @@ int main(){
         return 1;
     }
     close(fd);
-
-    char c2[100];
-
-    printf("Enter soft link name \n");
-    fgets(c2,100,stdin);
    
-    int result = symlink(c1, c2);
+      int result = mkfifo("my_fifo", 0666);
     if (result == 0) {
-        printf("Soft link created successfully.\n");
+        printf("FIFO created successfully.\n");
     } else {
-        perror("symlink");
+        perror("mkfifo");
     }
-    return 0; 
+    return 0;
 
 } 
 
