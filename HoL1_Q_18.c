@@ -22,6 +22,12 @@ to avoid race condition.
 
 #define size 20  // Size of each record including newline
 
+// Function prototypes
+void rd(int fd, int ind);
+void wr(int fd, int ind, const char *new_record);
+void unlocking(int fd, off_t offset, int len);
+void locking(int fd, off_t offset, int len, int lktyp);
+
 
 
 // Function to read a record

@@ -16,4 +16,4 @@ mkfifo fifo
 
 # Verify creation
 ls -l file.txt sft-lnk.txt hd-lnk.txt fifo
-ls -l
+

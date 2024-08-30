@@ -35,7 +35,7 @@ if(pid<0){
  else{
     printf("I am parent process of pid as %d \n",getpid());
     // comment wait for orphan
-   wait(NULL);            // commetn this to check for orphan process and please save first
+   //wait(NULL);            // commetn this to check for orphan process and please save first
  }
 
  

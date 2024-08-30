@@ -16,7 +16,7 @@ descriptors and check whether the file is updated properly or not.
  use fcntl
 */
 int main() {
-    int fd = open("file.txt", O_RDWR |O_APPEND| O_APPEND);
+    int fd = open("11b.txt", O_RDWR |O_CREAT| O_APPEND,0666);
     if (fd < 0) {
         perror("open");
         return 1;

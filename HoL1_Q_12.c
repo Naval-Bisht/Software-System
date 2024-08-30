@@ -15,7 +15,7 @@
 
 
 int main() {
-    char c1[100];
+    char c1[1000];
 
     printf("enter file name \n");
     fgets(c1,1000,stdin); 

@@ -5,5 +5,5 @@
 #a. check the return value of lseek
 #b. open the file with od and check the empty spaces in between the data.
 #*/
-od -c file.txt | grep " "
-od -t c file.txt | grep -o "' '" | wc -l
+od -c 10.txt | grep " "
+od -t c 10.txt | grep -o "' '" | wc -l

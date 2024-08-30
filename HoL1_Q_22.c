@@ -13,7 +13,7 @@
 #include<stdlib.h>
 #include<sys/wait.h>
 int main(){ 
-     int fd = open("naval.txt", O_WRONLY | O_CREAT|O_APPEND, 0777);
+     int fd = open("22.txt", O_WRONLY | O_CREAT|O_APPEND, 0777);
     if (fd == -1) {
         perror("error in opening the file");
         return 1;

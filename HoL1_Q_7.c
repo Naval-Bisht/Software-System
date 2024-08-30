@@ -12,16 +12,16 @@
 #include<stdlib.h>
 // man 2 open 
 int main(){ 
-       char c1[1000];
-    char c2[1000];
+    //    char c1[1000];
+    // char c2[1000];
 
-    printf("enter file name to copy\n");
-    fgets(c1,1000,stdin);                                     // name of file from where you want the data to be copied 
+    // printf("enter file name to copy\n");
+    // fgets(c1,1000,stdin);                                     // name of file from where you want the data to be copied 
 
-    printf("enter file name where you want to copy\n");
-    fgets(c2,1000,stdin);                                    // name of file where data will be copied 
-    int rd = open(c1,O_RDWR);                              // opening a file to read the the data 
-    int rd2 = open(c2,O_RDWR|O_CREAT,0777);                // opening the file where data will be coped 
+    // printf("enter file name where you want to copy\n");
+    // fgets(c2,1000,stdin);                                    // name of file where data will be copied 
+    int rd = open("7.txt",O_RDWR);                              // opening a file to read the the data 
+    int rd2 = open("7a.txt",O_RDWR|O_CREAT,0777);                // opening the file where data will be coped 
     
 
 

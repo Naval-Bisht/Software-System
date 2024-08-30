@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     int i=0;
     int k= 0;
     if (argc != 2) {
-        printf("please enter one file at a time \n");
+        printf("please enter one file at a time with one argument \n");
         while(k<argc){
                  printf("file entered  %s  \n", argv[k]);
                  k++;           

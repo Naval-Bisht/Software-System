@@ -30,7 +30,7 @@ int main(){
         if (pids[i] == 0) {
             // Child process
             printf("Child %d (PID: %d) executing.\n", i, getpid());
-            sleep(2);  // Simulate some work
+            sleep(2);  // for checking that it is havig a wait so that we can check our observation
             exit(0);
         }
     }

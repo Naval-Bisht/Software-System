@@ -13,7 +13,7 @@
 #include<stdlib.h>
 
 int main() {
-    int fd = open("naval.txt", O_RDONLY);
+    int fd = open("8.txt", O_RDONLY);
      char bfr[100];
     ssize_t mxs;
     int k=0;

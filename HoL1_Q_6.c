@@ -13,6 +13,7 @@
 
 int main() {
     char ch[100];
+    printf("enter data to read \n");
     ssize_t in = read(0, ch, 100);                
     if (in == -1) {
         perror("unsuccesful read");

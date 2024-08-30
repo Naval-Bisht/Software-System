@@ -25,7 +25,7 @@ int main(){
         exit(0);
     } else {
         // Parent  sleeps, child becomes a zombie as it has no whaere to go 
-        sleep(5);
+        sleep(50);
 
          printf("Parent  process PID:as  %d .\n", getpid());
         wait(NULL);  // Reap the zombie process

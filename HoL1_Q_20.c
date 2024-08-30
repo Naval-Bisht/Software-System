@@ -24,6 +24,7 @@ int main(){
 
     int pid = getpid();
     int p= getpriority(PRIO_PROCESS,pid);
+    printf("%d",p);
     // if(p==-1){
         
     // }

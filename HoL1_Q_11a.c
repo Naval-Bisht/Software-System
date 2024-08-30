@@ -17,7 +17,7 @@ descriptors and check whether the file is updated properly or not.
 
 */
 int main() {
-    char c1[100];
+    char c1[1000];
 
     printf("enter file name \n");
     fgets(c1,1000,stdin); 
@@ -28,7 +28,7 @@ int main() {
     }
 
     // Duplicate the file descriptor using dup2
-    int k = dup2(fd, 100); // Duplicating to descriptor 100
+    int k = dup2(fd, 1000); // Duplicating to descriptor 1000
     if (k < 0) {
         perror("dup2");
         return 1;
