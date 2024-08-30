@@ -20,30 +20,36 @@ int main(){
     int a;
     
     int fd;
-    fd = open("16.txt",O_RDWR|O_CREAT,0666);
-    lock.l_type=F_RDLCK;
+    fd = open("16.txt",O_RDWR|O_APPEND|O_CREAT,0666);
+    lock.l_type=F_WRLCK;
     lock.l_whence=SEEK_SET;
     lock.l_start = 0;
     lock.l_len = 0;
     lock.l_pid=getpid();
-    printf("before enterig the read lock\n");
+    printf("before enterig the write lock\n");
     sleep(2); 
 
-    fcntl(fd, F_SETLK, &lock);   //F_SETLKW is not used in read because it will 
+    fcntl(fd, F_SETLKW, &lock);   //F_SETLKW is not used in read because it will 
                                  // not make other file to aquire the lock but iin read we can have multiple read lock
 
-    printf("inside read \n");
+    printf("inside write \n");
+    char *c2 = strdup("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean\n");
+
+    if (write(fd, c2, strlen(c2) + 1) == -1) {
+        perror("write error ");
+        close(fd);
+        return 1;
+    }
+    
 
     printf("press enter to unlock\n");
 
     getchar();
 
      lock.l_type = F_UNLCK;
-     printf("read unlocked\n");
-     fcntl(fd, F_SETLK, &lock);
-
-     close(fd);
-
+     printf("write unlocked");
+     fcntl(fd, F_SETLKW, &lock);
+close(fd);
 
 
  
