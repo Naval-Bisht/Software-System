@@ -25,13 +25,14 @@ int main(){
 
     else if (pid == 0) {
         printf("Child process PID: as  %d .\n", getpid());
+      //  printf("Child  parenet process PID: as  %d .\n", getppid());
         exit(0);
     } else {
         // Parent  sleeps, child becomes a zombie as it has no whaere to go 
-        sleep(50);
+        sleep(5);
 
          printf("Parent  process PID:as  %d .\n", getpid());
-        wait(NULL);  // Reap the zombie process
+       // wait(NULL);  // Reap the zombie process
     }
 
  

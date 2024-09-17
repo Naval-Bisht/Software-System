@@ -1,6 +1,6 @@
 /*
 ============================================================================================
-File Name : 8.c
+File Name : 8e.c
 Author : Naval Kishore Singh Bisht
 Roll No : MT2024099
 Description : 8. Write a separate program using signal system call to catch the following signals.
@@ -15,27 +15,37 @@ Description : 8. Write a separate program using signal system call to catch the 
 Data : 16/09/2024
 ============================================================================================
 */
-// segmentaation fault 
-
 
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <sys/time.h>
+#include<unistd.h>
 
-// Signal handler for SIGSEGV
+// Signal handler for SIGVTALRM
 void signalHandler(int signum) {
-    fprintf(stderr, "Caught signal %d (SIGSEGV). Segmentation fault occurred.\n", signum);
+    printf("Caught signal %d (SIGVTALRM). Virtual timer expired.\n", signum);
     exit(signum);
 }
 
 int main() {
     // Register signal handler
-    signal(SIGSEGV, signalHandler);
+    signal(SIGVTALRM, signalHandler);
 
-    // Cause a segmentation fault
-    int *p = NULL;
-    *p = 42;
+    // Set up virtual timer
+    struct itimerval timer;
+    timer.it_value.tv_sec = 2;  // Initial expiration time
+    timer.it_value.tv_usec = 0;
+    timer.it_interval.tv_sec = 0;  
+    timer.it_interval.tv_usec = 0;
+
+    // Set virtual timer
+    setitimer(ITIMER_VIRTUAL, &timer, NULL);
+
+    
+
+while(1){}
 
     return 0;
 }

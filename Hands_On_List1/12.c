@@ -20,7 +20,7 @@ int main() {
 
     printf("enter file name \n");
     fgets(c1,1000,stdin); 
-    int fd = open(c1, O_RDWR | O_CREAT, 0644);
+    int fd = open(c1, O_RDONLY | O_CREAT, 0644);
     if (fd == -1) {
         perror("open");
         return 1;

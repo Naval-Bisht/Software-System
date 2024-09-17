@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define SCRIPT_PATH "/home/naval/SOFTWARE SYSTEM/HoL1_Q_30.sh"  // Define the path to the script
+#define SCRIPT_PATH "/home/naval/SOFTWARE SYSTEM/Hands_On_List1/30.sh"  // Define the path to the script
 
 int main() {
     int target_hour, target_minute;
