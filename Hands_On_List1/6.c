@@ -28,9 +28,13 @@ int main() {
                       // in the end to remove the garbadge valeu
 
     // Write to STDOUT
-    ssize_t out = write(0, ch, in );  // you can give size 100 or you can give 
+    ssize_t out = write(1, ch, in );  // you can give size 100 or you can give 
                                                     // by writing input-->(in) it wil not print garbage value as we created it 
-                                                    // as string by givig the null character
+                                                    // as string by givig the null character 
+                                                    // HERE WE use 0 and 1 asn for standatad iput adn standard output ;
+                                                // as we know taht the file dixcrotor 0 for inout 1 for outpout, 2 for error
+                                                
+
                                                     
     if (out == -1) {
         perror("write uncessuful");

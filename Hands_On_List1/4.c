@@ -38,6 +38,8 @@ int main(){
 return 0; 
 } 
 
+// man 2 open
+
 
 ////////////////////////////
 /* types of error 

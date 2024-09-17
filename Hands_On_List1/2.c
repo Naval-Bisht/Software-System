@@ -36,7 +36,8 @@ return 0;
          // ls /proc  ==> to check all the pid of the running process 
          // ls /proc/11361/fd  to check the process files
          // Each number corresponds to a different file descriptor:
-
+        // ls -l /proc/11361/fd all thde detauis about the descriptor
+        
 
 // to check all the deatail about the process 
 //  cat /proc/11361/status  ==> run this line
