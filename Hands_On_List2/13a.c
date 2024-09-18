@@ -1,6 +1,6 @@
 /*
 ============================================================================================
-File Name : 13.c
+File Name : 13a.c
 Author : Naval Kishore Singh Bisht
 Roll No : MT2024099
 Description : 13. Write two programs: first program is waiting to catch SIGSTOP signal, the
@@ -9,28 +9,31 @@ Description : 13. Write two programs: first program is waiting to catch SIGSTOP 
 Data : 17/09/2024
 ============================================================================================
 */
-// wait for sigstop
 #include <stdio.h>
 #include <signal.h>
-#include <unistd.h>
+#include <stdlib.h>
+#include<sys/types.h>
 
-int main() {
-    printf("Process waiting for SIGSTOP signal. PID: %d\n", getpid());
-
-    // Infinite loop to keep the program running
-    while (1) {
-      //  pause();  // Wait for any signal
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <pid>\n", argv[0]);
+        exit(EXIT_FAILURE);
     }
+
+    pid_t pid = atoi(argv[1]);
+    printf("Sending SIGSTOP to process %d\n", pid);
+    kill(pid, SIGSTOP);
 
     return 0;
 }
 
 /*
 Explanation:
-1. pause(): Suspends the process until a signal is caught.
-2. This program will not be able to catch `SIGSTOP` as it is one of the signals that cannot be caught or ignored.
+1. The program takes the PID of another process as an argument and sends it the `SIGSTOP` signal.
+2. kill(pid, SIGSTOP): Sends the `SIGSTOP` signal to the specified process, which stops it from executing until it receives a `SIGCONT` signal.
+3. `SIGSTOP` cannot be caught, blocked, or ignored by the target process.
 
 For more details, use the following man pages:
-- man 2 pause
-- man 7 signal (to see a list of signals, including those that cannot be caught)
+- man 2 kill
+- man 7 signal
 */
