@@ -47,3 +47,13 @@ int main() {
  * - Instead of using `signal()`, you can use `sigaction()` for more robust signal handling.
  * - Modify the interval to test different timings, e.g., try 5 seconds or different microsecond values.
  */
+
+
+
+// Output:
+
+// naval@Tarantula:~/SOFTWARE SYSTEM/Hands_On_List2$ cc 1.c
+// naval@Tarantula:~/SOFTWARE SYSTEM/Hands_On_List2$ ./a.out
+// Timer expired!
+// Timer expired!
+// ^C

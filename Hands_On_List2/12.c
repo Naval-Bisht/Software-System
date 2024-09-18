@@ -15,7 +15,7 @@ Data : 17/09/2024
 #include <sys/types.h>
 
 int main() {
-    pid_t pid = fork();
+    __pid_t pid = fork();
 
     if (pid > 0) {
         // Parent process
