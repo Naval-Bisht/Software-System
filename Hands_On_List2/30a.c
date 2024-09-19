@@ -1,6 +1,6 @@
 /*
 ============================================================================================
-File Name : 30.c
+File Name : 30a.c
 Author : Naval Kishore Singh Bisht
 Roll No : MT2024099
 Description : 30. Write a program to create a shared memory.
@@ -12,6 +12,7 @@ Data : 19/09/2024
 ============================================================================================
 */
 
+
 #include <stdio.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -22,29 +23,41 @@ int main() {
     int shmid;
     char *shared_memory;
 
-    // Generate a unique key
+    // Generate the same key
     key = ftok("shmfile", 65);
 
-    // Create shared memory segment
-    shmid = shmget(key, 1024, 0666 | IPC_CREAT);
+    // Get the shared memory segment
+    shmid = shmget(key, 1024, 0666);
     if (shmid < 0) {
         perror("shmget");
         return 1;
     }
 
-    // Attach the shared memory to the process
-    shared_memory = (char*) shmat(shmid, NULL, 0);
+    // Attach the shared memory in read-only mode
+    shared_memory = (char*) shmat(shmid, NULL, SHM_RDONLY);
     if (shared_memory == (char*)-1) {
         perror("shmat");
         return 1;
     }
 
-    // Write data to shared memory
-    strcpy(shared_memory, "Hello, this is data written to shared memory.");
-    printf("Data written to shared memory: %s\n", shared_memory);
+    // Try to overwrite data (this will fail due to read-only mode) //
+    // it will faail and caude the segmentation fault
+
+    printf("Attempting to write in read-only mode...\n");
+    strcpy(shared_memory, "Attempt to overwrite.");
+    printf("Data in shared memory: %s\n", shared_memory);
+
+// 
 
     // Detach the shared memory
     shmdt(shared_memory);
 
     return 0;
 }
+
+
+// // we will get this error 
+// naval@Tarantula:~/SOFTWARE SYSTEM/Hands_On_List2$ ./30a
+// Attempting to write in read-only mode...
+// Segmentation fault (core dumped)
+// naval@Tarantula:~/SOFTWARE SYSTEM/Hands_On_List2$ ^C

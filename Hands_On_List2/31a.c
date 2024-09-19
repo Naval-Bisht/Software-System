@@ -9,7 +9,6 @@ Description : 31. Write a program to create a semaphore and initialize value to 
 Data : 19/09/2024
 ============================================================================================
 */
-
 #include <stdio.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
@@ -18,8 +17,8 @@ int main() {
     key_t key = ftok("file31", 65);
     int semid = semget(key, 1, 0666 | IPC_CREAT);  // Create semaphore
 
-    semctl(semid, 0, SETVAL, 1);  // Initialize semaphore to 1 (binary semaphore)
-    printf("Binary semaphore created and initialized successfully \n");
+    semctl(semid, 0, SETVAL, 5);  // Initialize counting semaphore to 5
+    printf("Counting semaphore created and initialized successfully to 5 \n" );
 
     return 0;
 }

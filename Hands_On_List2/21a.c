@@ -26,19 +26,19 @@ int main() {
     mkfifo(FIFO2, 0666);
 
     while (1) {
-        // Write to FIFO1 and read from FIFO2
+        // Read from FIFO1 and write to FIFO2
 
-        // Open FIFO1 for writing
-        fd1 = open(FIFO1, O_WRONLY);
-        printf("Program 1: Enter message: ");
-        fgets(buffer, 100, stdin);
-        write(fd1, buffer, strlen(buffer) + 1);  // Write message to FIFO1
+        // Open FIFO1 for reading
+        fd1 = open(FIFO1, O_RDONLY);
+        read(fd1, buffer, sizeof(buffer));       // Read message from FIFO1
+        printf("Message received from program 1 is : %s\n", buffer);
         close(fd1);
 
-        // Open FIFO2 for reading
-        fd2 = open(FIFO2, O_RDONLY);
-        read(fd2, buffer, sizeof(buffer));       // Read response from FIFO2
-        printf("Message received from program 2 is : %s\n", buffer);
+        // Open FIFO2 for writing
+        fd2 = open(FIFO2, O_WRONLY);
+        printf("Program 2: Enter message: ");
+        fgets(buffer, 100, stdin);
+        write(fd2, buffer, strlen(buffer) + 1);  // Write response to FIFO2
         close(fd2);
     }
 

@@ -1,6 +1,6 @@
 /*
 ============================================================================================
-File Name : 34.c
+File Name : 34a.c
 Author : Naval Kishore Singh Bisht
 Roll No : MT2024099
 Description : 34. Write a program to create a concurrent server.
@@ -9,18 +9,27 @@ Description : 34. Write a program to create a concurrent server.
 Data : 19/09/2024
 ============================================================================================
 */
-// using fork()
+
+// using pthread
 
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <unistd.h>
+#include <pthread.h>
 #include <string.h>
+#include<unistd.h>
 
-// to receive the file in another terminal 
+void *handle_client(void *client_socket) {
+    int sock = *(int *)client_socket;
+    char buffer[1024];
+    recv(sock, buffer, sizeof(buffer), 0);
+    printf("Received: %s\n", buffer);
 
-//echo "Hello " | nc localhost 8080
-
+    char response[] = "Hello from server!";
+    send(sock, response, sizeof(response), 0);
+    close(sock);
+    return NULL;
+}
 
 int main() {
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -35,17 +44,10 @@ int main() {
 
     while (1) {
         int client_socket = accept(sockfd, NULL, NULL);
-        if (fork() == 0) {  // Create child process to handle client
-            char buffer[1024];
-            recv(client_socket, buffer, sizeof(buffer), 0);
-            printf("Received: %s\n", buffer);
-
-            char response[] = "Hello from server!";
-            send(client_socket, response, sizeof(response), 0);
-            close(client_socket);
-            return 0;
-        }
-        close(client_socket);
+        pthread_t thread_id;
+        pthread_create(&thread_id, NULL, handle_client, &client_socket);
+        pthread_detach(thread_id);  // Detach the thread to handle client independently
+        
     }
     close(sockfd);
     return 0;
