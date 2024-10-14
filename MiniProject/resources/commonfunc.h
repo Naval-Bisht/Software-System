@@ -69,6 +69,7 @@ bool login_handler(bool isAdmin, int connFD, struct Customer *ptrToCustomerID)
     {
         if (strcmp(readBuffer, ADMIN_LOGIN_ID) == 0)
             userFound = true;
+        
     }
     else
     {
@@ -108,7 +109,8 @@ bool login_handler(bool isAdmin, int connFD, struct Customer *ptrToCustomerID)
 
             if (strcmp(customer.login, readBuffer) == 0)
                 userFound = true;
-
+            else 
+                writeBytes = write(connFD, CUSTOMER_LOGIN_ID_DOESNT_EXIT, strlen(CUSTOMER_LOGIN_ID_DOESNT_EXIT));
             close(customerFileFD);
         }
         else

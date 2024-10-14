@@ -2,9 +2,12 @@
 #define ADMIN_FUNCTIONS
 
 #include "../resources/commonfunc.h"
-
+#include <stdio.h>
+#include <stdlib.h>
 // Function Prototypes =================================
 
+
+// #define SESSION_FILE "admin_session.txt"
 bool admin_operation_handler(int connFD);
 bool add_account(int connFD);
 int add_customer(int connFD, bool isPrimary, int newAccountNumber);
@@ -17,9 +20,114 @@ bool modify_customer_info(int connFD);
 
 // =====================================================
 
+
+
+///////////////////////////////////////////////////////////
+//////code for check in admin
+
+#define MAX_USERS 1
+
+typedef struct {
+    char username[50];
+    int is_logged_in; // 1 means logged in, 0 means logged out
+} UserSession;
+
+UserSession sessions[MAX_USERS];
+
+// Function to initialize session tracking
+void initialize_sessions() {
+    FILE *file = fopen("login.txt", "r");
+    if (file) {
+        fread(sessions, sizeof(UserSession), MAX_USERS, file);
+        fclose(file);
+    } else {
+        // Initialize all sessions to logged out
+        for (int i = 0; i < MAX_USERS; i++) {
+            sessions[i].is_logged_in = 0;
+        }
+    }
+}
+
+// Function to log in a user
+int login(char *username) {
+    for (int i = 0; i < MAX_USERS; i++) {
+        if (strcmp(sessions[i].username, username) == 0) {
+            if (sessions[i].is_logged_in) {
+                printf("User %s is already logged in. Only one session allowed.\n", username);
+                return 0;
+            }
+            sessions[i].is_logged_in = 1;
+            return 1;
+        }
+    }
+    printf("Invalid username.\n");
+    return 0;
+}
+
+// Function to log out a user
+void logout(char *username) {
+    for (int i = 0; i < MAX_USERS; i++) {
+        if (strcmp(sessions[i].username, username) == 0) {
+            sessions[i].is_logged_in = 0;
+            printf("User %s logged out successfully.\n", username);
+            return;
+        }
+    }
+}
+
+// Save sessions on exit
+void save_sessions() {
+    FILE *file = fopen("sessions.dat", "w");
+    fwrite(sessions, sizeof(UserSession), MAX_USERS, file);
+    fclose(file);
+}
+
+
+
+
+/*  ***********************************************************            *************        *******       */
+// int acheck() {
+//     FILE *file = fopen("admin_session.txt", "r");
+
+//     if (!file) {
+//         printf("Error opening session file for reading.\n");
+//         return 0; // Return failure if file can't be opened
+//     }
+
+//     int session_status;
+//     fscanf(file, "%d", &session_status);
+//     fclose(file);
+
+//     if (session_status == 1) {
+//         printf("Admin already logged in.\n");
+//         return 0;
+//     }
+
+//     // Admin is not logged in, log in the admin
+//     file = fopen("../admin/admin_session.txt", "w");
+//     if (!file) {
+//         printf("Error opening session file for writing.\n");
+//         return 0;
+//     }
+
+//     fprintf(file, "1");
+//     fclose(file);
+//     printf("Admin logged in successfully.\n");
+//     return 1;
+// }
+
+
+
+
+
+/////////////////////////////////////////////
+
+
 bool admin_operation_handler(int connFD)
 {
 
+    // int check= acheck();//
+    // if(check==0){
     if (login_handler(true, connFD, NULL))
     {
         ssize_t writeBytes, readBytes;            // Number of bytes read from / written to the client
@@ -71,12 +179,14 @@ bool admin_operation_handler(int connFD)
                 return false;
             }
         }
+        
     }
     else
     {
         // ADMIN LOGIN FAILED
         return false;
     }
+    // }// end of check if
     return true;
 }
 
@@ -87,7 +197,7 @@ bool add_account(int connFD)
 
     struct Account newAccount, prevAccount;
 
-    int accountFileDescriptor = open(ACCOUNT_FILE, O_RDONLY);
+    int accountFileDescriptor = open(ACCOUNT_FILE,O_RDONLY );  //| O_CREAT, 0666
     if (accountFileDescriptor == -1 && errno == ENOENT)
     {
         // Account file was never created
@@ -107,7 +217,7 @@ bool add_account(int connFD)
             return false;
         }
 
-        struct flock lock = {F_RDLCK, SEEK_SET, offset, sizeof(struct Account), getpid()};
+        struct flock lock = {F_RDLCK, SEEK_SET, offset, sizeof(struct Account), getpid()}; // why it is reading the lock if it is adding the  file
         int lockingStatus = fcntl(accountFileDescriptor, F_SETLKW, &lock);
         if (lockingStatus == -1)
         {

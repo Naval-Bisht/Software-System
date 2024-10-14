@@ -24,7 +24,7 @@ int main() {
     key_t key = ftok("progfile25", 65);
     int msgid = msgget(key, 0666 | IPC_CREAT);
 
-    struct msqid_ds buf;
+    struct msqid_ds buf;// this or we can make out own structire
     msgctl(msgid, IPC_STAT, &buf);  // Get message queue info
 
     printf("Access permission: %o\n", buf.msg_perm.mode);
@@ -38,3 +38,18 @@ int main() {
 
     return 0;
 }
+
+/* // making out own file structure  if we just need to send the message
+int main(){
+
+struct msg{
+long int m_type;
+char message[50];
+}myq;
+key = ftok("25.txt",4);
+mqid= msgget(key,)
+
+}
+
+
+*/

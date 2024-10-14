@@ -16,6 +16,9 @@ void main()
     int socketFileDescriptor, connectStatus;
     struct sockaddr_in serverAddress;
     struct sockaddr server;
+    // [doamin-->(af_inet)  for intternert domain(client and server on different server )] 0r[ u can use (af_unix) for unix version( clent and server on same machine )]
+    //  scoket type --> sock_stream for tcp  ,,sock_dgram for udp
+    // protocol normally jeust passed 0 
 
     socketFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
     if (socketFileDescriptor == -1)
@@ -49,7 +52,7 @@ void connection_handler(int sockFD)
 
     char tempBuffer[1000];
 
-    do
+    do // checking the connection by using special '^','$','#'
     {
         bzero(readBuffer, sizeof(readBuffer)); // Empty the read buffer
         bzero(tempBuffer, sizeof(tempBuffer));

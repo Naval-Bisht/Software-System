@@ -7,6 +7,8 @@
 #include <sys/types.h>  // Import for `socket`, `bind`, `listen`, `accept`, `fork`, `lseek` functions
 #include <sys/socket.h> // Import for `socket`, `bind`, `listen`, `accept` functions
 #include <netinet/ip.h> // Import for `sockaddr_in` stucture
+#include <sys/ipc.h>  // For `IPC_CREAT` and shared memory keys
+#include <sys/shm.h> 
 
 #include <string.h>  // Import for string functions
 #include <stdbool.h> // Import for `bool` data type
@@ -17,11 +19,47 @@
 #include "./customer/customer.h"
 
 void connection_handler(int connFD); // Handles the communication with the client
+ int shmid;
+    int *tot_mem;
+void shared_mem(){
+    
+    key_t key= ftok("miniproject",1234);
+    // Create shared memory segment
+    shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+    if (shmid == -1) {
+        perror("Error creating shared memory");
+        exit(1);
+    }
 
+    // Attach the shared memory to our process
+    tot_mem = (int *)shmat(shmid, NULL, 0);
+    if (tot_mem == (int *)-1) {
+        perror("Error attaching shared memory");
+        exit(1);
+    }
+
+    // Initialize the shared memory value
+    *tot_mem = 0;  // Set the value to 0 initially
+
+    printf("Total client: %d\n", (*tot_mem));
+
+    // Simulate some operation: Increment the value
+ 
+
+}
+void detach_sharedmemory(){
+
+    // Detach the shared memory from the process
+    if (shmdt(tot_mem) == -1) {
+        perror("Error detaching shared memory");
+        exit(1);
+    }
+}
 void main()
 {
     int socketFileDescriptor, socketBindStatus, socketListenStatus, connectionFileDescriptor;
     struct sockaddr_in serverAddress, clientAddress;
+    shared_mem();
 
     socketFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
     if (socketFileDescriptor == -1)
@@ -63,7 +101,11 @@ void main()
         {
             if (!fork())
             {
+                    (*tot_mem)++;
                 // Child will enter this branch
+                printf("Total client: %d\n", (*tot_mem));
+            
+
                 connection_handler(connectionFileDescriptor);
                 close(connectionFileDescriptor);
                 _exit(0);
@@ -71,6 +113,7 @@ void main()
         }
     }
 
+    detach_sharedmemory();
     close(socketFileDescriptor);
 }
 
@@ -96,21 +139,46 @@ void connection_handler(int connectionFileDescriptor)
         else
         {
             userChoice = atoi(readBuffer);
+
             switch (userChoice)
             {
             case 1:
                 // Admin
+
                 admin_operation_handler(connectionFileDescriptor);
                 break;
             case 2:
                 // Customer
                 customer_operation_handler(connectionFileDescriptor);
                 break;
+            // case 3:
+            // // employee
+            //     employee_operation_handler(connectionFileDescriptor);
+            //     break;
+            // case 4:
+            //     manager_operation_handler(connectionFileDescriptor);
+            //     break;
             default:
                 // Exit
+                 // Invalid choice, notify the client and terminate the connection
+                strcpy(writeBuffer, "Invalid choice! Terminating connection.\n$");
+                writeBytes = write(connectionFileDescriptor, writeBuffer, strlen(writeBuffer));
+                if (writeBytes == -1)
+                    perror("Error while sending termination message to client");
+                else
+                    printf("Sent termination message to client.\n");
                 break;
             }
         }
     }
+
     printf("Terminating connection to client!\n");
+    (*tot_mem)--;
+    
+   char message[100];
+    sprintf(message, "Client disconnected. Total clients: %d\n",*tot_mem);
+    write(STDOUT_FILENO, message, strlen(message));
+
+    close(connectionFileDescriptor); // Close the connection
+    
 }

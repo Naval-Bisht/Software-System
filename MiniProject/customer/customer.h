@@ -26,7 +26,7 @@ int write_transaction_to_file(int accountNumber, long int oldBalance, long int n
 
 bool customer_operation_handler(int connFD)
 {
-    if (login_handler(false, connFD, &loggedInCustomer))
+    if (login_handler(false, connFD, &loggedInCustomer))  // false signifies that it is not admin
     {
         ssize_t writeBytes, readBytes;            // Number of bytes read from / written to the client
         char readBuffer[1000], writeBuffer[1000]; // A buffer used for reading & writing to the client
@@ -113,6 +113,10 @@ bool customer_operation_handler(int connFD)
     else
     {
         // CUSTOMER LOGIN FAILED
+
+
+         write(connFD, CUSTOMER_ERROR, strlen(CUSTOMER_ERROR));
+
         return false;
     }
     return true;

@@ -1,7 +1,7 @@
 #ifndef ACCOUNT_RECORD
 #define ACCOUNT_RECORD
 
-#define MAX_TRANSACTIONS 10
+#define MAX_TRANSACTIONS 100
 
 struct Account
 {

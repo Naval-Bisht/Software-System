@@ -2,7 +2,7 @@
 #define SERVER_CONSTANTS
 
 
-#define INITIAL_PROMPT "Welcome to Spooks bank!\nWho are you?\n1. Admin\t2. Customer\nPress any other number to exit\nEnter the number corresponding to the choice!"
+#define INITIAL_PROMPT "----------------------------Welcome to the bank!----------------------\nChoose your position in the bank \n1. Admin\n2. Customer\n3.Employee\n4.Manager\nPress any other number to exit\nEnter the number corresponding to the choice!"
 
 // ========== COMMON TEXT =============================
 
@@ -33,8 +33,8 @@
 // ========== ADMIN SPECIFIC TEXT======================
 
 // LOGIN WELCOME
-#define ADMIN_LOGIN_WELCOME "Welcome dear admin! With great power comes great responsibility!\nEnter your credentials to unlock this power!"
-#define ADMIN_LOGIN_SUCCESS "Welcome superman!"
+#define ADMIN_LOGIN_WELCOME "Welcome dear admin! \nEnter your credentials "
+#define ADMIN_LOGIN_SUCCESS "Welcome Admin!"
 
 // ADMIN MENU
 #define ADMIN_MENU "1. Get Customer Details\n2. Get Account Details\n3. Get Transaction details\n4. Add Account\n5. Delete Account\n6. Modify Customer Information\nPress any other key to logout"
@@ -68,7 +68,7 @@
 
 #define ADMIN_MOD_CUSTOMER_SUCCESS "The required modification was successfully made!\nYou'll now be redirected to the main menu!^"
 
-#define ADMIN_LOGOUT "Logging you out now superman! Good bye!$"
+#define ADMIN_LOGOUT "Logging you out now Admin! Good bye!$"
 
 // ====================================================
 
@@ -77,8 +77,9 @@
 // LOGIN WELCOME
 #define CUSTOMER_LOGIN_WELCOME "Welcome dear customer! Enter your credentials to gain access to your account!"
 #define CUSTOMER_LOGIN_SUCCESS "Welcome beloved customer!"
-
 #define CUSTOMER_LOGOUT "Logging you out now dear customer! Good bye!$"
+
+#define CUSTOMER_ERROR "ERROR entry ! Please try again!$"
 
 // ADMIN MENU
 #define CUSTOMER_MENU "1. Get Customer Details\n2. Deposit Money\n3. Withdraw Money\n4. Get Balance\n5. Get Transaction information\n6. Change Password\nPress any other key to logout"
@@ -103,8 +104,8 @@
 // ====================================================
 
 
-#define ACCOUNT_FILE "./records/account.bank"
-#define CUSTOMER_FILE "./records/customer.bank"
-#define TRANSACTION_FILE "./records/transactions.bank"
+#define ACCOUNT_FILE "../database/account.bank"
+#define CUSTOMER_FILE "../database/customer.bank"
+#define TRANSACTION_FILE "../database/transactions.bank"
 
 #endif
