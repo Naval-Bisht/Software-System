@@ -51,13 +51,13 @@ bool admin_operation_handler(int connFD)
             switch (choice)
             {
             case 1:
-                // get_customer_details(connFD, -1);
+                //  get_customer_details(connFD, -1);
                 break;
             case 2:
                 get_account_details(connFD, NULL);
                 break;
             case 3: 
-                // get_transaction_details(connFD, -1);
+                get_transaction_details(connFD, -1);
                 break;
             case 4:
                 add_account(connFD);
@@ -73,6 +73,7 @@ bool admin_operation_handler(int connFD)
                 return false;
             }
         }
+        //return true;
         
     }
     else
