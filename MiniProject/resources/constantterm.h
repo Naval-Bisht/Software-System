@@ -104,8 +104,8 @@
 // ====================================================
 
 
-#define ACCOUNT_FILE "../database/account.bank"
-#define CUSTOMER_FILE "../database/customer.bank"
-#define TRANSACTION_FILE "../database/transactions.bank"
+#define ACCOUNT_FILE "./database/account.bank"
+// #define CUSTOMER_FILE "./database/customer.bank"
+#define TRANSACTION_FILE "./database/transactions.bank"
 
 #endif

@@ -5,7 +5,7 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 
-struct Customer loggedInCustomer;
+struct Account loggedInCustomer;
 int semIdentifier;
 
 // Function Prototypes =================================
@@ -32,7 +32,7 @@ bool customer_operation_handler(int connFD)
         char readBuffer[1000], writeBuffer[1000]; // A buffer used for reading & writing to the client
 
         // Get a semaphore for the user
-        key_t semKey = ftok(CUSTOMER_FILE, loggedInCustomer.account); // Generate a key based on the account number hence, different customers will have different semaphores
+        key_t semKey = ftok(ACCOUNT_FILE, loggedInCustomer.id); // Generate a key based on the account number hence, different customers will have different semaphores
 
         union semun
         {
@@ -87,7 +87,7 @@ bool customer_operation_handler(int connFD)
             switch (choice)
             {
             case 1:
-                get_customer_details(connFD, loggedInCustomer.id);
+                // get_customer_details(connFD, loggedInCustomer.id);
                 break;
             case 2:
                 deposit(connFD);
@@ -99,7 +99,7 @@ bool customer_operation_handler(int connFD)
                 get_balance(connFD);
                 break;
             case 5:
-                get_transaction_details(connFD, loggedInCustomer.account);
+                // get_transaction_details(connFD, loggedInCustomer.id);
                 break;
             case 6:
                 change_password(connFD);
@@ -128,7 +128,7 @@ bool deposit(int connFD)
     ssize_t readBytes, writeBytes;
 
     struct Account account;
-    account.accountNumber = loggedInCustomer.account;
+    account.id = loggedInCustomer.id;
 
     long int depositAmount = 0;
 
@@ -139,7 +139,7 @@ bool deposit(int connFD)
     if (get_account_details(connFD, &account))
     {
         
-        if (account.active)
+        if (account.isActive)
         {
 
             writeBytes = write(connFD, DEPOSIT_AMOUNT, strlen(DEPOSIT_AMOUNT));
@@ -163,13 +163,13 @@ bool deposit(int connFD)
             if (depositAmount != 0)
             {
 
-                int newTransactionID = write_transaction_to_file(account.accountNumber, account.balance, account.balance + depositAmount, 1);
-                write_transaction_to_array(account.transactions, newTransactionID);
+                int newTransactionID = write_transaction_to_file(account.id, account.balance, account.balance + depositAmount, 1);
+                write_transaction_to_array(account.trancsaction, newTransactionID);
 
                 account.balance += depositAmount;
 
                 int accountFileDescriptor = open(ACCOUNT_FILE, O_WRONLY);
-                off_t offset = lseek(accountFileDescriptor, account.accountNumber * sizeof(struct Account), SEEK_SET);
+                off_t offset = lseek(accountFileDescriptor, account.id * sizeof(struct Account), SEEK_SET);
 
                 struct flock lock = {F_WRLCK, SEEK_SET, offset, sizeof(struct Account), getpid()};
                 int lockingStatus = fcntl(accountFileDescriptor, F_SETLKW, &lock);
@@ -223,7 +223,7 @@ bool withdraw(int connFD)
     ssize_t readBytes, writeBytes;
 
     struct Account account;
-    account.accountNumber = loggedInCustomer.account;
+    account.id = loggedInCustomer.id;
 
     long int withdrawAmount = 0;
 
@@ -233,7 +233,7 @@ bool withdraw(int connFD)
 
     if (get_account_details(connFD, &account))
     {
-        if (account.active)
+        if (account.isActive)
         {
 
             writeBytes = write(connFD, WITHDRAW_AMOUNT, strlen(WITHDRAW_AMOUNT));
@@ -258,13 +258,13 @@ bool withdraw(int connFD)
             if (withdrawAmount != 0 && account.balance - withdrawAmount >= 0)
             {
 
-                int newTransactionID = write_transaction_to_file(account.accountNumber, account.balance, account.balance - withdrawAmount, 0);
-                write_transaction_to_array(account.transactions, newTransactionID);
+                int newTransactionID = write_transaction_to_file(account.id, account.balance, account.balance - withdrawAmount, 0);
+                write_transaction_to_array(account.trancsaction, newTransactionID);
 
                 account.balance -= withdrawAmount;
 
                 int accountFileDescriptor = open(ACCOUNT_FILE, O_WRONLY);
-                off_t offset = lseek(accountFileDescriptor, account.accountNumber * sizeof(struct Account), SEEK_SET);
+                off_t offset = lseek(accountFileDescriptor, account.id * sizeof(struct Account), SEEK_SET);
 
                 struct flock lock = {F_WRLCK, SEEK_SET, offset, sizeof(struct Account), getpid()};
                 int lockingStatus = fcntl(accountFileDescriptor, F_SETLKW, &lock);
@@ -316,13 +316,13 @@ bool get_balance(int connFD)
 {
     char buffer[1000];
     struct Account account;
-    account.accountNumber = loggedInCustomer.account;
+    account.id = loggedInCustomer.id;
     if (get_account_details(connFD, &account))
     {
         bzero(buffer, sizeof(buffer));
-        if (account.active)
+        if (account.isActive)
         {
-            sprintf(buffer, "You have ₹ %ld imaginary money in our bank!^", account.balance);
+            sprintf(buffer, "You have ₹ %d imaginary money in our bank!^", account.balance);
             write(connFD, buffer, strlen(buffer));
         }
         else
@@ -412,7 +412,7 @@ bool change_password(int connFD)
 
             strcpy(loggedInCustomer.password, newPassword);
 
-            int customerFileDescriptor = open(CUSTOMER_FILE, O_WRONLY);
+            int customerFileDescriptor = open(ACCOUNT_FILE, O_WRONLY);
             if (customerFileDescriptor == -1)
             {
                 perror("Error opening customer file!");
@@ -420,7 +420,7 @@ bool change_password(int connFD)
                 return false;
             }
 
-            off_t offset = lseek(customerFileDescriptor, loggedInCustomer.id * sizeof(struct Customer), SEEK_SET);
+            off_t offset = lseek(customerFileDescriptor, loggedInCustomer.id * sizeof(struct Account), SEEK_SET);
             if (offset == -1)
             {
                 perror("Error seeking to the customer record!");
@@ -428,7 +428,7 @@ bool change_password(int connFD)
                 return false;
             }
 
-            struct flock lock = {F_WRLCK, SEEK_SET, offset, sizeof(struct Customer), getpid()};
+            struct flock lock = {F_WRLCK, SEEK_SET, offset, sizeof(struct Account), getpid()};
             int lockingStatus = fcntl(customerFileDescriptor, F_SETLKW, &lock);
             if (lockingStatus == -1)
             {
@@ -437,7 +437,7 @@ bool change_password(int connFD)
                 return false;
             }
 
-            writeBytes = write(customerFileDescriptor, &loggedInCustomer, sizeof(struct Customer));
+            writeBytes = write(customerFileDescriptor, &loggedInCustomer, sizeof(struct Account));
             if (writeBytes == -1)
             {
                 perror("Error storing updated customer password into customer record!");
@@ -526,12 +526,16 @@ void write_transaction_to_array(int *transactionArray, int ID)
 
 int write_transaction_to_file(int accountNumber, long int oldBalance, long int newBalance, bool operation)
 {
+    time_t currentTime;
+    struct tm *timeInfo;
+    time(&currentTime);
+    timeInfo = localtime(&currentTime);
     struct Transaction newTransaction;
     newTransaction.accountNumber = accountNumber;
     newTransaction.oldBalance = oldBalance;
     newTransaction.newBalance = newBalance;
     newTransaction.operation = operation;
-    newTransaction.transactionTime = time(NULL);
+    strftime(newTransaction.transactionTime, sizeof(newTransaction.transactionTime), "%Y-%m-%d %H:%M:%S", timeInfo);
 
     ssize_t readBytes, writeBytes;
 

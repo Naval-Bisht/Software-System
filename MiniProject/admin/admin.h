@@ -14,112 +14,6 @@ int add_customer(int connFD, bool isPrimary, int newAccountNumber);
 bool delete_account(int connFD);
 bool modify_customer_info(int connFD);
 
-// =====================================================
-
-// Function Definition =================================
-
-// =====================================================
-
-
-
-///////////////////////////////////////////////////////////
-//////code for check in admin
-
-#define MAX_USERS 1
-
-typedef struct {
-    char username[50];
-    int is_logged_in; // 1 means logged in, 0 means logged out
-} UserSession;
-
-UserSession sessions[MAX_USERS];
-
-// Function to initialize session tracking
-void initialize_sessions() {
-    FILE *file = fopen("login.txt", "r");
-    if (file) {
-        fread(sessions, sizeof(UserSession), MAX_USERS, file);
-        fclose(file);
-    } else {
-        // Initialize all sessions to logged out
-        for (int i = 0; i < MAX_USERS; i++) {
-            sessions[i].is_logged_in = 0;
-        }
-    }
-}
-
-// Function to log in a user
-int login(char *username) {
-    for (int i = 0; i < MAX_USERS; i++) {
-        if (strcmp(sessions[i].username, username) == 0) {
-            if (sessions[i].is_logged_in) {
-                printf("User %s is already logged in. Only one session allowed.\n", username);
-                return 0;
-            }
-            sessions[i].is_logged_in = 1;
-            return 1;
-        }
-    }
-    printf("Invalid username.\n");
-    return 0;
-}
-
-// Function to log out a user
-void logout(char *username) {
-    for (int i = 0; i < MAX_USERS; i++) {
-        if (strcmp(sessions[i].username, username) == 0) {
-            sessions[i].is_logged_in = 0;
-            printf("User %s logged out successfully.\n", username);
-            return;
-        }
-    }
-}
-
-// Save sessions on exit
-void save_sessions() {
-    FILE *file = fopen("sessions.dat", "w");
-    fwrite(sessions, sizeof(UserSession), MAX_USERS, file);
-    fclose(file);
-}
-
-
-
-
-/*  ***********************************************************            *************        *******       */
-// int acheck() {
-//     FILE *file = fopen("admin_session.txt", "r");
-
-//     if (!file) {
-//         printf("Error opening session file for reading.\n");
-//         return 0; // Return failure if file can't be opened
-//     }
-
-//     int session_status;
-//     fscanf(file, "%d", &session_status);
-//     fclose(file);
-
-//     if (session_status == 1) {
-//         printf("Admin already logged in.\n");
-//         return 0;
-//     }
-
-//     // Admin is not logged in, log in the admin
-//     file = fopen("../admin/admin_session.txt", "w");
-//     if (!file) {
-//         printf("Error opening session file for writing.\n");
-//         return 0;
-//     }
-
-//     fprintf(file, "1");
-//     fclose(file);
-//     printf("Admin logged in successfully.\n");
-//     return 1;
-// }
-
-
-
-
-
 /////////////////////////////////////////////
 
 
@@ -157,13 +51,13 @@ bool admin_operation_handler(int connFD)
             switch (choice)
             {
             case 1:
-                get_customer_details(connFD, -1);
+                // get_customer_details(connFD, -1);
                 break;
             case 2:
                 get_account_details(connFD, NULL);
                 break;
             case 3: 
-                get_transaction_details(connFD, -1);
+                // get_transaction_details(connFD, -1);
                 break;
             case 4:
                 add_account(connFD);
@@ -201,7 +95,7 @@ bool add_account(int connFD)
     if (accountFileDescriptor == -1 && errno == ENOENT)
     {
         // Account file was never created
-        newAccount.accountNumber = 0;
+        newAccount.id= 0;
     }
     else if (accountFileDescriptor == -1)
     {
@@ -237,36 +131,15 @@ bool add_account(int connFD)
 
         close(accountFileDescriptor);
 
-        newAccount.accountNumber = prevAccount.accountNumber + 1;
-    }
-    writeBytes = write(connFD, ADMIN_ADD_ACCOUNT_TYPE, strlen(ADMIN_ADD_ACCOUNT_TYPE));
-    if (writeBytes == -1)
-    {
-        perror("Error writing ADMIN_ADD_ACCOUNT_TYPE message to client!");
-        return false;
+        newAccount.id = prevAccount.id + 1;
     }
 
-    bzero(readBuffer, sizeof(readBuffer));
-    readBytes = read(connFD, &readBuffer, sizeof(readBuffer));
-    if (readBytes == -1)
-    {
-        perror("Error reading account type response from client!");
-        return false;
-    }
-
-    newAccount.isRegularAccount = atoi(readBuffer) == 1 ? true : false;
-
-    newAccount.owners[0] = add_customer(connFD, true, newAccount.accountNumber);
-
-    if (newAccount.isRegularAccount)
-        newAccount.owners[1] = -1;
-    else
-        newAccount.owners[1] = add_customer(connFD, false, newAccount.accountNumber);
-
-    newAccount.active = true;
+  
+   
+    newAccount.isActive = true;
     newAccount.balance = 0;
 
-    memset(newAccount.transactions, -1, MAX_TRANSACTIONS * sizeof(int));
+    memset(newAccount.trancsaction, -1, MAX_TRANSACTIONS * sizeof(int));
 
     accountFileDescriptor = open(ACCOUNT_FILE, O_CREAT | O_APPEND | O_WRONLY, S_IRWXU);
     if (accountFileDescriptor == -1)
@@ -274,78 +147,7 @@ bool add_account(int connFD)
         perror("Error while creating / opening account file!");
         return false;
     }
-
-    writeBytes = write(accountFileDescriptor, &newAccount, sizeof(struct Account));
-    if (writeBytes == -1)
-    {
-        perror("Error while writing Account record to file!");
-        return false;
-    }
-
-    close(accountFileDescriptor);
-
-    bzero(writeBuffer, sizeof(writeBuffer));
-    sprintf(writeBuffer, "%s%d", ADMIN_ADD_ACCOUNT_NUMBER, newAccount.accountNumber);
-    strcat(writeBuffer, "\nRedirecting you to the main menu ...^");
-    writeBytes = write(connFD, writeBuffer, sizeof(writeBuffer));
-    readBytes = read(connFD, readBuffer, sizeof(read)); // Dummy read
-    return true;
-}
-
-int add_customer(int connFD, bool isPrimary, int newAccountNumber)
-{
-    ssize_t readBytes, writeBytes;
-    char readBuffer[1000], writeBuffer[1000];
-
-    struct Customer newCustomer, previousCustomer;
-
-    int customerFileDescriptor = open(CUSTOMER_FILE, O_RDONLY);
-    if (customerFileDescriptor == -1 && errno == ENOENT)
-    {
-        // Customer file was never created
-        newCustomer.id = 0;
-    }
-    else if (customerFileDescriptor == -1)
-    {
-        perror("Error while opening customer file");
-        return -1;
-    }
-    else
-    {
-        int offset = lseek(customerFileDescriptor, -sizeof(struct Customer), SEEK_END);
-        if (offset == -1)
-        {
-            perror("Error seeking to last Customer record!");
-            return false;
-        }
-
-        struct flock lock = {F_RDLCK, SEEK_SET, offset, sizeof(struct Customer), getpid()};
-        int lockingStatus = fcntl(customerFileDescriptor, F_SETLKW, &lock);
-        if (lockingStatus == -1)
-        {
-            perror("Error obtaining read lock on Customer record!");
-            return false;
-        }
-
-        readBytes = read(customerFileDescriptor, &previousCustomer, sizeof(struct Customer));
-        if (readBytes == -1)
-        {
-            perror("Error while reading Customer record from file!");
-            return false;
-        }
-
-        lock.l_type = F_UNLCK;
-        fcntl(customerFileDescriptor, F_SETLK, &lock);
-
-        close(customerFileDescriptor);
-
-        newCustomer.id = previousCustomer.id + 1;
-    }
-
-    if (isPrimary)
-        sprintf(writeBuffer, "%s%s", ADMIN_ADD_CUSTOMER_PRIMARY, ADMIN_ADD_CUSTOMER_NAME);
-    else
-        sprintf(writeBuffer, "%s%s", ADMIN_ADD_CUSTOMER_SECONDARY, ADMIN_ADD_CUSTOMER_NAME);
+    sprintf(writeBuffer, "%s",ADMIN_ADD_CUSTOMER_NAME);
 
     writeBytes = write(connFD, writeBuffer, sizeof(writeBuffer));
     if (writeBytes == -1)
@@ -362,8 +164,7 @@ int add_customer(int connFD, bool isPrimary, int newAccountNumber)
         return false;
     }
 
-    strcpy(newCustomer.name, readBuffer);
-
+    strcpy(newAccount.name, readBuffer);
     writeBytes = write(connFD, ADMIN_ADD_CUSTOMER_GENDER, strlen(ADMIN_ADD_CUSTOMER_GENDER));
     if (writeBytes == -1)
     {
@@ -380,7 +181,7 @@ int add_customer(int connFD, bool isPrimary, int newAccountNumber)
     }
 
     if (readBuffer[0] == 'M' || readBuffer[0] == 'F' || readBuffer[0] == 'O')
-        newCustomer.gender = readBuffer[0];
+        newAccount.gender = readBuffer[0];
     else
     {
         writeBytes = write(connFD, ADMIN_ADD_CUSTOMER_WRONG_GENDER, strlen(ADMIN_ADD_CUSTOMER_WRONG_GENDER));
@@ -420,48 +221,206 @@ int add_customer(int connFD, bool isPrimary, int newAccountNumber)
         readBytes = read(connFD, readBuffer, sizeof(readBuffer)); // Dummy read
         return false;
     }
-    newCustomer.age = customerAge;
+    newAccount.age = customerAge;
 
-    newCustomer.account = newAccountNumber;
+    //  newCustomer.account = newAccountNumber;
 
-    strcpy(newCustomer.login, newCustomer.name);
-    strcat(newCustomer.login, "-");
-    sprintf(writeBuffer, "%d", newCustomer.id);
-    strcat(newCustomer.login, writeBuffer);
+    strcpy(newAccount.login, newAccount.name);
+    strcat(newAccount.login, "-");
+    sprintf(writeBuffer, "%d", newAccount.id);
+    strcat(newAccount.login, writeBuffer);
 
     char hashedPassword[1000];
     strcpy(hashedPassword, crypt(AUTOGEN_PASSWORD, SALT_BAE));
-    strcpy(newCustomer.password, hashedPassword);
-
-    customerFileDescriptor = open(CUSTOMER_FILE, O_CREAT | O_APPEND | O_WRONLY, S_IRWXU);
-    if (customerFileDescriptor == -1)
-    {
-        perror("Error while creating / opening customer file!");
-        return false;
-    }
-    writeBytes = write(customerFileDescriptor, &newCustomer, sizeof(newCustomer));
+    strcpy(newAccount.password, hashedPassword);
+    write(connFD,newAccount.login,strlen(newAccount.login));
+    writeBytes = write(accountFileDescriptor, &newAccount, sizeof(struct Account));
     if (writeBytes == -1)
     {
-        perror("Error while writing Customer record to file!");
+        perror("Error while writing Account record to file!");
         return false;
     }
 
-    close(customerFileDescriptor);
+    close(accountFileDescriptor);
 
     bzero(writeBuffer, sizeof(writeBuffer));
-    sprintf(writeBuffer, "%s%s-%d\n%s%s", ADMIN_ADD_CUSTOMER_AUTOGEN_LOGIN, newCustomer.name, newCustomer.id, ADMIN_ADD_CUSTOMER_AUTOGEN_PASSWORD, AUTOGEN_PASSWORD);
-    strcat(writeBuffer, "^");
-    writeBytes = write(connFD, writeBuffer, strlen(writeBuffer));
-    if (writeBytes == -1)
-    {
-        perror("Error sending customer loginID and password to the client!");
-        return false;
-    }
-
-    readBytes = read(connFD, readBuffer, sizeof(readBuffer)); // Dummy read
-
-    return newCustomer.id;
+    sprintf(writeBuffer, "%s%d", ADMIN_ADD_ACCOUNT_NUMBER, newAccount.id);
+    strcat(writeBuffer, "\nRedirecting you to the main menu ...^");
+    writeBytes = write(connFD, writeBuffer, sizeof(writeBuffer));
+    readBytes = read(connFD, readBuffer, sizeof(read)); // Dummy read
+    return true;
 }
+
+// int add_customer(int connFD, bool isPrimary, int newAccountNumber)
+// {
+//     ssize_t readBytes, writeBytes;
+//     char readBuffer[1000], writeBuffer[1000];
+
+//     struct Customer newCustomer, previousCustomer;
+
+//     int customerFileDescriptor = open(CUSTOMER_FILE, O_RDONLY);
+//     if (customerFileDescriptor == -1 && errno == ENOENT)
+//     {
+//         // Customer file was never created
+//         newCustomer.id = 0;
+//     }
+//     else if (customerFileDescriptor == -1)
+//     {
+//         perror("Error while opening customer file");
+//         return -1;
+//     }
+//     else
+//     {
+//         int offset = lseek(customerFileDescriptor, -sizeof(struct Customer), SEEK_END);
+//         if (offset == -1)
+//         {
+//             perror("Error seeking to last Customer record!");
+//             return false;
+//         }
+
+//         struct flock lock = {F_RDLCK, SEEK_SET, offset, sizeof(struct Customer), getpid()};
+//         int lockingStatus = fcntl(customerFileDescriptor, F_SETLKW, &lock);
+//         if (lockingStatus == -1)
+//         {
+//             perror("Error obtaining read lock on Customer record!");
+//             return false;
+//         }
+
+//         readBytes = read(customerFileDescriptor, &previousCustomer, sizeof(struct Customer));
+//         if (readBytes == -1)
+//         {
+//             perror("Error while reading Customer record from file!");
+//             return false;
+//         }
+
+//         lock.l_type = F_UNLCK;
+//         fcntl(customerFileDescriptor, F_SETLK, &lock);
+
+//         close(customerFileDescriptor);
+
+//         newCustomer.id = previousCustomer.id + 1;
+//     }
+
+//     if (isPrimary)
+//         sprintf(writeBuffer, "%s%s", ADMIN_ADD_CUSTOMER_PRIMARY, ADMIN_ADD_CUSTOMER_NAME);
+//     else
+//         sprintf(writeBuffer, "%s%s", ADMIN_ADD_CUSTOMER_SECONDARY, ADMIN_ADD_CUSTOMER_NAME);
+
+//     writeBytes = write(connFD, writeBuffer, sizeof(writeBuffer));
+//     if (writeBytes == -1)
+//     {
+//         perror("Error writing ADMIN_ADD_CUSTOMER_NAME message to client!");
+//         return false;
+//     }
+
+//     readBytes = read(connFD, readBuffer, sizeof(readBuffer));
+//     if (readBytes == -1)
+//     {
+//         perror("Error reading customer name response from client!");
+//         ;
+//         return false;
+//     }
+
+//     strcpy(newCustomer.name, readBuffer);
+
+//     writeBytes = write(connFD, ADMIN_ADD_CUSTOMER_GENDER, strlen(ADMIN_ADD_CUSTOMER_GENDER));
+//     if (writeBytes == -1)
+//     {
+//         perror("Error writing ADMIN_ADD_CUSTOMER_GENDER message to client!");
+//         return false;
+//     }
+
+//     bzero(readBuffer, sizeof(readBuffer));
+//     readBytes = read(connFD, readBuffer, sizeof(readBuffer));
+//     if (readBytes == -1)
+//     {
+//         perror("Error reading customer gender response from client!");
+//         return false;
+//     }
+
+//     if (readBuffer[0] == 'M' || readBuffer[0] == 'F' || readBuffer[0] == 'O')
+//         newCustomer.gender = readBuffer[0];
+//     else
+//     {
+//         writeBytes = write(connFD, ADMIN_ADD_CUSTOMER_WRONG_GENDER, strlen(ADMIN_ADD_CUSTOMER_WRONG_GENDER));
+//         readBytes = read(connFD, readBuffer, sizeof(readBuffer)); // Dummy read
+//         return false;
+//     }
+
+//     bzero(writeBuffer, sizeof(writeBuffer));
+//     strcpy(writeBuffer, ADMIN_ADD_CUSTOMER_AGE);
+//     writeBytes = write(connFD, writeBuffer, strlen(writeBuffer));
+//     if (writeBytes == -1)
+//     {
+//         perror("Error writing ADMIN_ADD_CUSTOMER_AGE message to client!");
+//         return false;
+//     }
+
+//     bzero(readBuffer, sizeof(readBuffer));
+//     readBytes = read(connFD, readBuffer, sizeof(readBuffer));
+//     if (readBytes == -1)
+//     {
+//         perror("Error reading customer age response from client!");
+//         return false;
+//     }
+
+//     int customerAge = atoi(readBuffer);
+//     if (customerAge == 0)
+//     {
+//         // Either client has sent age as 0 (which is invalid) or has entered a non-numeric string
+//         bzero(writeBuffer, sizeof(writeBuffer));
+//         strcpy(writeBuffer, ERRON_INPUT_FOR_NUMBER);
+//         writeBytes = write(connFD, writeBuffer, strlen(writeBuffer));
+//         if (writeBytes == -1)
+//         {
+//             perror("Error while writing ERRON_INPUT_FOR_NUMBER message to client!");
+//             return false;
+//         }
+//         readBytes = read(connFD, readBuffer, sizeof(readBuffer)); // Dummy read
+//         return false;
+//     }
+//     newCustomer.age = customerAge;
+
+//     newCustomer.account = newAccountNumber;
+
+//     strcpy(newCustomer.login, newCustomer.name);
+//     strcat(newCustomer.login, "-");
+//     sprintf(writeBuffer, "%d", newCustomer.id);
+//     strcat(newCustomer.login, writeBuffer);
+
+//     char hashedPassword[1000];
+//     strcpy(hashedPassword, crypt(AUTOGEN_PASSWORD, SALT_BAE));
+//     strcpy(newCustomer.password, hashedPassword);
+
+//     customerFileDescriptor = open(CUSTOMER_FILE, O_CREAT | O_APPEND | O_WRONLY, S_IRWXU);
+//     if (customerFileDescriptor == -1)
+//     {
+//         perror("Error while creating / opening customer file!");
+//         return false;
+//     }
+//     writeBytes = write(customerFileDescriptor, &newCustomer, sizeof(newCustomer));
+//     if (writeBytes == -1)
+//     {
+//         perror("Error while writing Customer record to file!");
+//         return false;
+//     }
+
+//     close(customerFileDescriptor);
+
+//     bzero(writeBuffer, sizeof(writeBuffer));
+//     sprintf(writeBuffer, "%s%s-%d\n%s%s", ADMIN_ADD_CUSTOMER_AUTOGEN_LOGIN, newCustomer.name, newCustomer.id, ADMIN_ADD_CUSTOMER_AUTOGEN_PASSWORD, AUTOGEN_PASSWORD);
+//     strcat(writeBuffer, "^");
+//     writeBytes = write(connFD, writeBuffer, strlen(writeBuffer));
+//     if (writeBytes == -1)
+//     {
+//         perror("Error sending customer loginID and password to the client!");
+//         return false;
+//     }
+
+//     readBytes = read(connFD, readBuffer, sizeof(readBuffer)); // Dummy read
+
+//     return newCustomer.id;
+// }
 
 bool delete_account(int connFD)
 {
@@ -551,7 +510,7 @@ bool delete_account(int connFD)
     if (account.balance == 0)
     {
         // No money, hence can close account
-        account.active = false;
+        account.isActive = false;
         accountFileDescriptor = open(ACCOUNT_FILE, O_WRONLY);
         if (accountFileDescriptor == -1)
         {
@@ -607,7 +566,7 @@ bool modify_customer_info(int connFD)
     ssize_t readBytes, writeBytes;
     char readBuffer[1000], writeBuffer[1000];
 
-    struct Customer customer;
+    struct Account account;
 
     int customerID;
 
@@ -630,7 +589,7 @@ bool modify_customer_info(int connFD)
 
     customerID = atoi(readBuffer);
 
-    int customerFileDescriptor = open(CUSTOMER_FILE, O_RDONLY);
+    int customerFileDescriptor = open(ACCOUNT_FILE, O_RDONLY);
     if (customerFileDescriptor == -1)
     {
         // Customer File doesn't exist
@@ -647,7 +606,7 @@ bool modify_customer_info(int connFD)
         return false;
     }
     
-    offset = lseek(customerFileDescriptor, customerID * sizeof(struct Customer), SEEK_SET);
+    offset = lseek(customerFileDescriptor, customerID * sizeof(struct Account), SEEK_SET);
     if (errno == EINVAL)
     {
         // Customer record doesn't exist
@@ -669,7 +628,7 @@ bool modify_customer_info(int connFD)
         return false;
     }
 
-    struct flock lock = {F_RDLCK, SEEK_SET, offset, sizeof(struct Customer), getpid()};
+    struct flock lock = {F_RDLCK, SEEK_SET, offset, sizeof(struct Account), getpid()};
 
     // Lock the record to be read
     lockingStatus = fcntl(customerFileDescriptor, F_SETLKW, &lock);
@@ -679,7 +638,7 @@ bool modify_customer_info(int connFD)
         return false;
     }
 
-    readBytes = read(customerFileDescriptor, &customer, sizeof(struct Customer));
+    readBytes = read(customerFileDescriptor, &account, sizeof(struct Account));
     if (readBytes == -1)
     {
         perror("Error while reading customer record from the file!");
@@ -736,7 +695,7 @@ bool modify_customer_info(int connFD)
             perror("Error while getting response for customer's new name from client!");
             return false;
         }
-        strcpy(customer.name, readBuffer);
+        strcpy(account.name, readBuffer);
         break;
     case 2:
         writeBytes = write(connFD, ADMIN_MOD_CUSTOMER_NEW_AGE, strlen(ADMIN_MOD_CUSTOMER_NEW_AGE));
@@ -766,7 +725,7 @@ bool modify_customer_info(int connFD)
             readBytes = read(connFD, readBuffer, sizeof(readBuffer)); // Dummy read
             return false;
         }
-        customer.age = updatedAge;
+        account.age = updatedAge;
         break;
     case 3:
         writeBytes = write(connFD, ADMIN_MOD_CUSTOMER_NEW_GENDER, strlen(ADMIN_MOD_CUSTOMER_NEW_GENDER));
@@ -781,7 +740,7 @@ bool modify_customer_info(int connFD)
             perror("Error while getting response for customer's new gender from client!");
             return false;
         }
-        customer.gender = readBuffer[0];
+        account.gender = readBuffer[0];
         break;
     default:
         bzero(writeBuffer, sizeof(writeBuffer));
@@ -796,13 +755,13 @@ bool modify_customer_info(int connFD)
         return false;
     }
 
-    customerFileDescriptor = open(CUSTOMER_FILE, O_WRONLY);
+    customerFileDescriptor = open(ACCOUNT_FILE, O_WRONLY);
     if (customerFileDescriptor == -1)
     {
         perror("Error while opening customer file");
         return false;
     }
-    offset = lseek(customerFileDescriptor, customerID * sizeof(struct Customer), SEEK_SET);
+    offset = lseek(customerFileDescriptor, customerID * sizeof(struct Account), SEEK_SET);
     if (offset == -1)
     {
         perror("Error while seeking to required customer record!");
@@ -818,7 +777,7 @@ bool modify_customer_info(int connFD)
         return false;
     }
 
-    writeBytes = write(customerFileDescriptor, &customer, sizeof(struct Customer));
+    writeBytes = write(customerFileDescriptor, &account, sizeof(struct Account));
     if (writeBytes == -1)
     {
         perror("Error while writing update customer info into file");

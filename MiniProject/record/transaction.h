@@ -10,7 +10,7 @@ struct Transaction
     bool operation; // 0 -> Withdraw, 1 -> Deposit
     long int oldBalance;
     long int newBalance;
-    time_t transactionTime;
+    char transactionTime[50];
 };
 
 #endif

@@ -14,9 +14,10 @@
 #include <stdbool.h> // Import for `bool` data type
 #include <stdlib.h>  // Import for `atoi` function
 
-#include "./resources/constantterm.h"
 #include "./admin/admin.h"
 #include "./customer/customer.h"
+#include "./record/account.h"
+#include "./resources/constantterm.h"
 
 void connection_handler(int connFD); // Handles the communication with the client
  int shmid;
