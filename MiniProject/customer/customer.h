@@ -99,7 +99,7 @@ bool customer_operation_handler(int connFD)
                 get_balance(connFD);
                 break;
             case 5:
-                // get_transaction_details(connFD, loggedInCustomer.id);
+                get_transaction_details(connFD, loggedInCustomer.id);
                 break;
             case 6:
                 change_password(connFD);
